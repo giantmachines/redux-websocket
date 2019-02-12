@@ -1,5 +1,3 @@
-/* eslint-env browser */
-/* @flow */
 import partial from 'lodash/fp/partial';
 import partialRight from 'lodash/fp/partialRight';
 import { compose, Store } from 'redux';

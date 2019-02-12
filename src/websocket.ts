@@ -1,6 +1,3 @@
-/* eslint-env browser */
-/* @flow */
-
 /**
  * Formats args for creating the WebSocket instance
  */

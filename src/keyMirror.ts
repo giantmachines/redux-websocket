@@ -1,5 +1,3 @@
-/* eslint no-param-reassign: "off" */
-
 /**
  * Get keys from an array or an object
  * @param {string[]|object} keys - An array or object whose elements or keys are key values.
