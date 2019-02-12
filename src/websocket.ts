@@ -4,7 +4,7 @@
 /**
  * Formats args for creating the WebSocket instance
  */
-const extractArgs = (config) => {
+const extractArgs = config => {
   if (config.args) {
     return config.args;
   }
@@ -16,13 +16,12 @@ const extractArgs = (config) => {
   return [];
 };
 
-
 /**
  * Create a websocket object from the incoming config
  */
-export const createWebsocket = (payload: Config) => {
+export const createWebsocket = payload => {
   const args = extractArgs(payload);
-  const websocket = (payload.websocket) ? payload.websocket : WebSocket;
+  const websocket = payload.websocket ? payload.websocket : WebSocket;
 
   return new websocket(...args);
 };

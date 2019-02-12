@@ -18,12 +18,12 @@ export const WEBSOCKET_MESSAGE = 'WEBSOCKET:MESSAGE';
 
 const createMiddleware = () => {
   // Hold a reference to the WebSocket instance in use.
-  let websocket: ?WebSocket;
+  let websocket;
 
   /**
    * A function to create the WebSocket object and attach the standard callbacks
    */
-  const initialize = ({ dispatch }, config: Config) => {
+  const initialize = ({ dispatch }, config) => {
     // Instantiate the websocket.
     websocket = createWebsocket(config);
 
@@ -58,7 +58,7 @@ const createMiddleware = () => {
    * The primary Redux middleware function.
    * Each of the actions handled are user-dispatched.
    */
-  return (store: Object) => (next: Function) => (action: Action) => {
+  return store => (next: Function) => action => {
     switch (action.type) {
       // User request to connect
       case WEBSOCKET_CONNECT:

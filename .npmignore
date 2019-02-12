@@ -1,6 +1,0 @@
-node_modules
-coverage
-*.log
-*.iml
-.idea
-yarn.lock
