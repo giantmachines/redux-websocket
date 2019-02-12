@@ -1,7 +1,8 @@
 import partial from 'lodash/fp/partial';
 import partialRight from 'lodash/fp/partialRight';
-import { compose, Store } from 'redux';
+import { compose, Middleware, MiddlewareAPI } from 'redux';
 import { closed, connecting, message, open } from './actions';
+import { Config, ReduxWebSocket } from './types';
 import { createWebsocket } from './websocket';
 
 // Action types to be dispatched by the user
@@ -14,14 +15,14 @@ export const WEBSOCKET_OPEN = 'WEBSOCKET:OPEN';
 export const WEBSOCKET_CLOSED = 'WEBSOCKET:CLOSED';
 export const WEBSOCKET_MESSAGE = 'WEBSOCKET:MESSAGE';
 
-const createMiddleware = () => {
+const createMiddleware = (): Middleware => {
   // Hold a reference to the WebSocket instance in use.
-  let websocket;
+  let websocket: ReduxWebSocket | null;
 
   /**
    * A function to create the WebSocket object and attach the standard callbacks
    */
-  const initialize = ({ dispatch }: Store, config: object) => {
+  const initialize = ({ dispatch }: MiddlewareAPI, config: Config) => {
     // Instantiate the websocket.
     websocket = createWebsocket(config);
 

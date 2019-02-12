@@ -1,7 +1,9 @@
+import { Config, ReduxWebSocket } from "./types";
+
 /**
  * Formats args for creating the WebSocket instance
  */
-const extractArgs = config => {
+const extractArgs = (config: Config) => {
   if (config.args) {
     return config.args;
   }
@@ -16,9 +18,9 @@ const extractArgs = config => {
 /**
  * Create a websocket object from the incoming config
  */
-export const createWebsocket = payload => {
+export const createWebsocket = (payload: Config): ReduxWebSocket => {
   const args = extractArgs(payload);
-  const websocket = payload.websocket ? payload.websocket : WebSocket;
+  const websocket: any = payload.websocket ? payload.websocket : WebSocket;
 
   return new websocket(...args);
 };

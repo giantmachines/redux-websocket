@@ -1,12 +1,12 @@
 {
   "compilerOptions": {
-      "outDir": "./dist",
-      "target": "es5",
-      "declaration": false,
-      "strict": false,
-      "allowSyntheticDefaultImports": true
+    "outDir": "./dist",
+    "target": "es5",
+    "declaration": false,
+    "strict": true,
+    "allowSyntheticDefaultImports": true
   },
   "include": [
-      "./src/**/*"
+    "./src/**/*"
   ]
 }

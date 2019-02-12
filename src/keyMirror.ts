@@ -1,9 +1,8 @@
 /**
  * Get keys from an array or an object
- * @param {string[]|object} keys - An array or object whose elements or keys are key values.
- * @return {string[]} An array of key values (strings).
  */
-export const toKeys = keys => (Array.isArray(keys) ? keys : Object.keys(keys));
+export const toKeys = (keys: object | string[]): string[] =>
+  (Array.isArray(keys) ? keys : Object.keys(keys));
 
 /**
  * Transform an array or an object with key values into an object with key/value
@@ -22,8 +21,8 @@ export const toKeys = keys => (Array.isArray(keys) ? keys : Object.keys(keys));
  * const mirror = keyMirror(keys)
  * // => { one: 'one', two: 'two', three: 'three' }
  */
-export default keys =>
-  toKeys(keys).reduce((obj, key) => {
+export default (keys: object | string[]): object =>
+  toKeys(keys).reduce((obj: {[k:string]: string}, key) => {
     obj[key] = key;
     return obj;
   }, {});

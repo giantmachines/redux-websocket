@@ -8,3 +8,13 @@ export const WEBSOCKET_OPEN = 'WEBSOCKET:OPEN';
 export const WEBSOCKET_DISCONNECTING = 'WEBSOCKET:DISCONNECTING';
 export const WEBSOCKET_CLOSED = 'WEBSOCKET:CLOSED';
 export const WEBSOCKET_MESSAGE = 'WEBSOCKET:MESSAGE';
+
+export interface ReduxWebSocket extends WebSocket {
+  onconnecting: any;
+}
+
+export interface Config {
+  url?: string;
+  websocket?: WebSocket;
+  args?: any[];
+};
