@@ -3,10 +3,9 @@
   "version": "0.3.0",
   "description": "A redux middleware to handle websocket connections",
   "main": "dist/index.js",
-  "types": "index.d.ts",
+  "types": "dist/index.d.ts",
   "files": [
-    "dist/**/*",
-    "index.d.ts"
+    "dist/**/*"
   ],
   "directories": {
     "test": "test"
