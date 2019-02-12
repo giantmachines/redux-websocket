@@ -1,9 +1,9 @@
 /* eslint-env browser */
 /* @flow */
-import { compose } from 'redux';
 import partial from 'lodash/fp/partial';
 import partialRight from 'lodash/fp/partialRight';
-import { connecting, open, closed, message } from './actions';
+import { compose, Store } from 'redux';
+import { closed, connecting, message, open } from './actions';
 import { createWebsocket } from './websocket';
 
 // Action types to be dispatched by the user
@@ -23,7 +23,7 @@ const createMiddleware = () => {
   /**
    * A function to create the WebSocket object and attach the standard callbacks
    */
-  const initialize = ({ dispatch }, config) => {
+  const initialize = ({ dispatch }: Store, config: object) => {
     // Instantiate the websocket.
     websocket = createWebsocket(config);
 
@@ -39,7 +39,7 @@ const createMiddleware = () => {
     // An optimistic callback assignment for WebSocket objects that support this
     const onConnecting = dispatchAction(connecting);
     // Add the websocket as the 2nd argument (after the event).
-    // $FlowFixMe
+
     websocket.onconnecting = partialRight(onConnecting, [websocket]);
   };
 
@@ -48,6 +48,7 @@ const createMiddleware = () => {
    */
   const close = () => {
     if (websocket) {
+      // tslint:disable-next-line no-console
       console.warn(`Closing WebSocket connection to ${websocket.url} ...`);
       websocket.close();
       websocket = null;
@@ -58,7 +59,7 @@ const createMiddleware = () => {
    * The primary Redux middleware function.
    * Each of the actions handled are user-dispatched.
    */
-  return store => (next: Function) => action => {
+  return store => next => action => {
     switch (action.type) {
       // User request to connect
       case WEBSOCKET_CONNECT:
@@ -76,6 +77,7 @@ const createMiddleware = () => {
         if (websocket) {
           websocket.send(JSON.stringify(action.payload));
         } else {
+          // tslint:disable-next-line no-console
           console.warn('WebSocket is closed, ignoring. Trigger a WEBSOCKET_CONNECT first.');
         }
         break;

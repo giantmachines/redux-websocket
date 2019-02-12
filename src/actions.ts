@@ -1,40 +1,40 @@
-import { WEBSOCKET_CONNECTING, WEBSOCKET_OPEN, WEBSOCKET_CLOSED, WEBSOCKET_MESSAGE } from './index';
+import { WEBSOCKET_CLOSED, WEBSOCKET_CONNECTING, WEBSOCKET_MESSAGE, WEBSOCKET_OPEN } from './index';
 
 // These actions are more concerned with connection state
 // and are trigged async by the WebSocketMiddleware
 
-export const connecting = (event: Event, websocket) => ({
-  type: WEBSOCKET_CONNECTING,
+export const connecting = (event: Event, websocket: WebSocket) => ({
   payload: {
-    timestamp: new Date(),
     event,
+    timestamp: new Date(),
     websocket,
   },
+  type: WEBSOCKET_CONNECTING,
 });
 
 export const open = (event: Event) => ({
-  type: WEBSOCKET_OPEN,
   payload: {
-    timestamp: new Date(),
     event,
+    timestamp: new Date(),
   },
+  type: WEBSOCKET_OPEN,
 });
 
 export const closed = (event: Event) => ({
-  type: WEBSOCKET_CLOSED,
   payload: {
-    timestamp: new Date(),
     event,
+    timestamp: new Date(),
   },
+  type: WEBSOCKET_CLOSED,
 });
 
 export const message = (event: MessageEvent) => ({
-  type: WEBSOCKET_MESSAGE,
   payload: {
-    timestamp: new Date(),
     data: event.data,
     event,
+    timestamp: new Date(),
   },
+  type: WEBSOCKET_MESSAGE,
 });
 
 export default {};

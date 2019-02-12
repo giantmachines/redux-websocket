@@ -2,7 +2,7 @@
   "compilerOptions": {
       "outDir": "./dist",
       "target": "es5",
-      "declaration": true,
+      "declaration": false,
       "strict": false,
       "allowSyntheticDefaultImports": true
   },
