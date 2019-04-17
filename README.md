@@ -1,4 +1,4 @@
-# redux-websocket [![codecov](https://codecov.io/gh/giantmachines/redux-websocket/branch/master/graph/badge.svg)](https://codecov.io/gh/giantmachines/redux-websocket)
+# redux-websocket [![codecov](https://codecov.io/gh/giantmachines/redux-websocket/branch/master/graph/badge.svg)](https://codecov.io/gh/giantmachines/redux-websocket) [![Netlify Status](https://api.netlify.com/api/v1/badges/a1f94ae2-533f-4c37-a0b8-850001020f92/deploy-status)](https://app.netlify.com/sites/elegant-euclid-a7e434/deploys)
 
 `redux-websocket` is a Redux middleware for managing data over a WebSocket connection.
 
