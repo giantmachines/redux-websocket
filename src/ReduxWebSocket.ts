@@ -66,7 +66,7 @@ export default class ReduxWebSocket {
     const { prefix } = this.options;
 
     this.lastSocketUrl = payload.url;
-    this.websocket = new WebSocket(payload.url, payload.subprotocols);
+    this.websocket = new WebSocket(payload.url, payload.protocols);
     
     this.websocket.addEventListener('close', event => this.handleClose(dispatch, prefix, event));
     this.websocket.addEventListener('error', () => this.handleError(dispatch, prefix));
