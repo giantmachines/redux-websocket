@@ -14,7 +14,7 @@ describe('ReduxWebSocket', () => {
   const url = 'ws://fake.com';
   const options = {
     prefix: 'REDUX_WEBSOCKET',
-    reconnectInterval: 2000,
+    reconnectInterval: 2000
   };
   const closeMock = jest.fn();
   const sendMock = jest.fn();
@@ -33,7 +33,7 @@ describe('ReduxWebSocket', () => {
     global.WebSocket = jest.fn(() => ({
       addEventListener: addEventListenerMock,
       close: closeMock,
-      send: sendMock,
+      send: sendMock
     }));
   });
 
@@ -46,26 +46,58 @@ describe('ReduxWebSocket', () => {
 
     it('creates a new WebSocket instance', () => {
       expect(global.WebSocket).toHaveBeenCalledTimes(1);
-      expect(global.WebSocket).toHaveBeenCalledWith(url);
+      expect(global.WebSocket).toHaveBeenCalledWith(url, undefined);
+    });
+
+    it('optionally takes a protocols option', () => {
+      const protocols = ['testprotocol1', 'testprotocol2'];
+      const connectAction: Action = {
+        type: 'SEND',
+        payload: { url, protocols }
+      };
+
+      global.WebSocket.mockClear();
+
+      reduxWebSocket.connect(store, connectAction);
+
+      expect(global.WebSocket).toHaveBeenCalledTimes(1);
+      expect(global.WebSocket).toHaveBeenCalledWith(url, protocols);
     });
 
     it('closes any existing connections', () => {
       reduxWebSocket.connect(store, action as Action);
 
       expect(closeMock).toHaveBeenCalledTimes(1);
-      expect(closeMock).toHaveBeenCalledWith(1000, 'WebSocket connection closed by redux-websocket.');
+      expect(closeMock).toHaveBeenCalledWith(
+        1000,
+        'WebSocket connection closed by redux-websocket.'
+      );
     });
 
     it('binds all event listeners', () => {
       expect(addEventListenerMock).toHaveBeenCalledTimes(4);
-      expect(addEventListenerMock).toHaveBeenCalledWith('close', expect.any(Function));
-      expect(addEventListenerMock).toHaveBeenCalledWith('error', expect.any(Function));
-      expect(addEventListenerMock).toHaveBeenCalledWith('open', expect.any(Function));
-      expect(addEventListenerMock).toHaveBeenCalledWith('message', expect.any(Function));
+      expect(addEventListenerMock).toHaveBeenCalledWith(
+        'close',
+        expect.any(Function)
+      );
+      expect(addEventListenerMock).toHaveBeenCalledWith(
+        'error',
+        expect.any(Function)
+      );
+      expect(addEventListenerMock).toHaveBeenCalledWith(
+        'open',
+        expect.any(Function)
+      );
+      expect(addEventListenerMock).toHaveBeenCalledWith(
+        'message',
+        expect.any(Function)
+      );
     });
 
     it('handles a close event', () => {
-      const event = addEventListenerMock.mock.calls.find(call => call[0] === 'close');
+      const event = addEventListenerMock.mock.calls.find(
+        call => call[0] === 'close'
+      );
 
       event[1]('test event');
 
@@ -73,14 +105,16 @@ describe('ReduxWebSocket', () => {
       expect(store.dispatch).toHaveBeenCalledWith({
         type: 'REDUX_WEBSOCKET::CLOSED',
         meta: {
-          timestamp: expect.any(Date),
+          timestamp: expect.any(Date)
         },
-        payload: 'test event',
+        payload: 'test event'
       });
     });
 
     it('handles a message event', () => {
-      const event = addEventListenerMock.mock.calls.find(call => call[0] === 'message');
+      const event = addEventListenerMock.mock.calls.find(
+        call => call[0] === 'message'
+      );
       const data = '{ "test": "message" }';
       const testEvent = { data, origin: 'test origin' };
 
@@ -90,19 +124,21 @@ describe('ReduxWebSocket', () => {
       expect(store.dispatch).toHaveBeenCalledWith({
         type: 'REDUX_WEBSOCKET::MESSAGE',
         meta: {
-          timestamp: expect.any(Date),
+          timestamp: expect.any(Date)
         },
         payload: {
           event: testEvent,
           message: data,
-          origin: 'test origin',
-        },
+          origin: 'test origin'
+        }
       });
     });
 
     describe('error event', () => {
       it('handles an error event', () => {
-        const event = addEventListenerMock.mock.calls.find(call => call[0] === 'error');
+        const event = addEventListenerMock.mock.calls.find(
+          call => call[0] === 'error'
+        );
         const testEvent = { currentTarget: { url: 'test url' } };
 
         event[1](testEvent);
@@ -114,10 +150,10 @@ describe('ReduxWebSocket', () => {
             timestamp: expect.any(Date),
             message: '`redux-websocket` error',
             name: 'Error',
-            originalAction: null,
+            originalAction: null
           },
           payload: expect.any(Error),
-          error: true,
+          error: true
         });
       });
 
@@ -128,7 +164,9 @@ describe('ReduxWebSocket', () => {
         reduxWebSocket.handleBrokenConnection = jest.fn();
 
         // @ts-ignore
-        reduxWebSocket.handleError(dispatch, 'prefix', { currentTarget: { url: 'test' } } as any);
+        reduxWebSocket.handleError(dispatch, 'prefix', {
+          currentTarget: { url: 'test' }
+        } as any);
 
         // @ts-ignore
         expect(reduxWebSocket.handleBrokenConnection).not.toHaveBeenCalled();
@@ -137,19 +175,25 @@ describe('ReduxWebSocket', () => {
         reduxWebSocket.hasOpened = true;
 
         // @ts-ignore
-        reduxWebSocket.handleError(dispatch, 'prefix', { currentTarget: { url: 'test' } } as any);
+        reduxWebSocket.handleError(dispatch, 'prefix', {
+          currentTarget: { url: 'test' }
+        } as any);
 
         // @ts-ignore
         expect(reduxWebSocket.handleBrokenConnection).toHaveBeenCalledTimes(1);
 
         // @ts-ignore
-        expect(reduxWebSocket.handleBrokenConnection).toHaveBeenCalledWith(dispatch);
+        expect(reduxWebSocket.handleBrokenConnection).toHaveBeenCalledWith(
+          dispatch
+        );
       });
     });
 
     describe('open event', () => {
       it('dispatches an open action and sets the hasOpened flag', () => {
-        const event = addEventListenerMock.mock.calls.find(call => call[0] === 'open');
+        const event = addEventListenerMock.mock.calls.find(
+          call => call[0] === 'open'
+        );
 
         event[1]();
 
@@ -157,8 +201,8 @@ describe('ReduxWebSocket', () => {
         expect(store.dispatch).toHaveBeenCalledWith({
           type: 'REDUX_WEBSOCKET::OPEN',
           meta: {
-            timestamp: expect.any(Date),
-          },
+            timestamp: expect.any(Date)
+          }
         });
         // @ts-ignore
         expect(reduxWebSocket.hasOpened).toEqual(true);
@@ -171,7 +215,9 @@ describe('ReduxWebSocket', () => {
         reduxWebSocket.options.onOpen = onOpen;
         reduxWebSocket.connect(store, action as Action);
 
-        const event = addEventListenerMock.mock.calls.find(call => call[0] === 'open');
+        const event = addEventListenerMock.mock.calls.find(
+          call => call[0] === 'open'
+        );
 
         event[1]('test event');
 
@@ -181,7 +227,9 @@ describe('ReduxWebSocket', () => {
       });
 
       it('handles successful reconnection', () => {
-        const event = addEventListenerMock.mock.calls.find(call => call[0] === 'open');
+        const event = addEventListenerMock.mock.calls.find(
+          call => call[0] === 'open'
+        );
 
         // @ts-ignore
         reduxWebSocket.reconnectionInterval = 'truthy';
@@ -202,15 +250,15 @@ describe('ReduxWebSocket', () => {
         expect(store.dispatch).toHaveBeenCalledWith({
           type: 'REDUX_WEBSOCKET::RECONNECTED',
           meta: {
-            timestamp: expect.any(Date),
-          },
+            timestamp: expect.any(Date)
+          }
         });
         expect(store.dispatch).toHaveBeenCalledWith({
           type: 'REDUX_WEBSOCKET::OPEN',
           meta: {
-            timestamp: expect.any(Date),
+            timestamp: expect.any(Date)
           },
-          payload: 'test event',
+          payload: 'test event'
         });
       });
     });
@@ -227,8 +275,9 @@ describe('ReduxWebSocket', () => {
     });
 
     it('should throw an error if no connection exists', () => {
-      expect(() => reduxWebSocket.disconnect())
-        .toThrow('Socket connection not initialized. Dispatch WEBSOCKET_CONNECT first');
+      expect(() => reduxWebSocket.disconnect()).toThrow(
+        'Socket connection not initialized. Dispatch WEBSOCKET_CONNECT first'
+      );
     });
   });
 
@@ -244,8 +293,11 @@ describe('ReduxWebSocket', () => {
     });
 
     it('should throw an error if no connection exists', () => {
-      expect(() => reduxWebSocket.send(null as any, { payload: null } as any))
-        .toThrow('Socket connection not initialized. Dispatch WEBSOCKET_CONNECT first');
+      expect(() =>
+        reduxWebSocket.send(null as any, { payload: null } as any)
+      ).toThrow(
+        'Socket connection not initialized. Dispatch WEBSOCKET_CONNECT first'
+      );
     });
   });
 
@@ -269,41 +321,41 @@ describe('ReduxWebSocket', () => {
       expect(dispatch).toHaveBeenNthCalledWith(1, {
         type: 'REDUX_WEBSOCKET::BROKEN',
         meta: {
-          timestamp: expect.any(Date),
-        },
+          timestamp: expect.any(Date)
+        }
       });
       expect(dispatch).toHaveBeenNthCalledWith(2, {
         type: 'REDUX_WEBSOCKET::BEGIN_RECONNECT',
         meta: {
-          timestamp: expect.any(Date),
-        },
+          timestamp: expect.any(Date)
+        }
       });
       expect(dispatch).toHaveBeenNthCalledWith(3, {
         type: 'REDUX_WEBSOCKET::RECONNECT_ATTEMPT',
         meta: {
-          timestamp: expect.any(Date),
+          timestamp: expect.any(Date)
         },
         payload: {
-          count: 1,
-        },
+          count: 1
+        }
       });
       expect(dispatch).toHaveBeenNthCalledWith(4, {
         type: 'REDUX_WEBSOCKET::RECONNECT_ATTEMPT',
         meta: {
-          timestamp: expect.any(Date),
+          timestamp: expect.any(Date)
         },
         payload: {
-          count: 2,
-        },
+          count: 2
+        }
       });
       expect(dispatch).toHaveBeenNthCalledWith(5, {
         type: 'REDUX_WEBSOCKET::RECONNECT_ATTEMPT',
         meta: {
-          timestamp: expect.any(Date),
+          timestamp: expect.any(Date)
         },
         payload: {
-          count: 3,
-        },
+          count: 3
+        }
       });
     });
   });
