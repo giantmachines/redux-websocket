@@ -21,6 +21,10 @@ type BuiltAction<T> = {
   },
   payload?: T,
 }
+type ConnectPayload = {
+  url: string;
+  protocols: string | string[];
+};
 
 /**
  * Create an FSA compliant action.
@@ -46,7 +50,13 @@ function buildAction<T>(actionType: string, payload?: T, meta?: any): BuiltActio
 
 // Action creators for user dispatched actions. These actions are all optionally
 // prefixed.
-export const connect = (url: string, prefix?: string) => buildAction(`${prefix || DEFAULT_PREFIX}::${WEBSOCKET_CONNECT}`, { url });
+export const connect = (config: string | ConnectPayload, prefix?: string) =>
+  buildAction(
+    `${prefix || DEFAULT_PREFIX}::${WEBSOCKET_CONNECT}`,
+    typeof config === "string"
+      ? { url: config }
+      : { url: config.url, protocols: config.protocols }
+  );
 export const disconnect = (prefix?: string) => buildAction(`${prefix || DEFAULT_PREFIX}::${WEBSOCKET_DISCONNECT}`);
 export const send = (msg: any, prefix?: string) => buildAction(`${prefix || DEFAULT_PREFIX}::${WEBSOCKET_SEND}`, msg);
 

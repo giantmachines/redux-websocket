@@ -32,6 +32,20 @@ describe('actions', () => {
           },
         });
       });
+
+      it("should return action with protocols field in the payload if it's provided", () => {
+        const act = actions.connect({
+          url: "fake url",
+          protocols: ["subprotocol1", "subprotocol2"]
+        })
+
+        expect(act).toMatchObject({
+          payload: {
+            url: "fake url",
+            protocols: ["subprotocol1", "subprotocol2"]
+          }
+        });
+      });
     });
 
     describe('disconnect', () => {
