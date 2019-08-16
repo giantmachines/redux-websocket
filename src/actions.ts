@@ -14,6 +14,10 @@ import {
 } from './actionTypes';
 import { Action } from './types';
 
+type WithProtocols = [string[]] | [string[], string];
+type WithPrefix = [string];
+type ConnectRestArgs = [] | WithPrefix | WithProtocols;
+
 type BuiltAction<T> = {
   type: string,
   meta: {
@@ -21,6 +25,12 @@ type BuiltAction<T> = {
   },
   payload?: T,
 }
+
+/**
+ * Determine if the rest args to `connect` contains protocols or not.
+ * @private
+ */
+const isProtocols = (args: ConnectRestArgs): args is WithProtocols => Array.isArray(args[0]);
 
 /**
  * Create an FSA compliant action.
@@ -46,7 +56,25 @@ function buildAction<T>(actionType: string, payload?: T, meta?: any): BuiltActio
 
 // Action creators for user dispatched actions. These actions are all optionally
 // prefixed.
-export const connect = (url: string, prefix?: string) => buildAction(`${prefix || DEFAULT_PREFIX}::${WEBSOCKET_CONNECT}`, { url });
+export const connect = (url: string, ...args: ConnectRestArgs) => {
+  let prefix: string | undefined;
+  let protocols: string[] | undefined;
+
+  // If there's only one argument, check if it's protocols or a prefix.
+  if (args.length === 1) {
+    [protocols, prefix] = isProtocols(args) ? args : [undefined, args[0]];
+  }
+
+  // If there are two arguments after `url`, assume it's protocols and prefix.
+  if (args.length === 2) {
+    [protocols, prefix] = args;
+  }
+
+  return buildAction(
+    `${prefix || DEFAULT_PREFIX}::${WEBSOCKET_CONNECT}`,
+    { url, protocols },
+  );
+};
 export const disconnect = (prefix?: string) => buildAction(`${prefix || DEFAULT_PREFIX}::${WEBSOCKET_DISCONNECT}`);
 export const send = (msg: any, prefix?: string) => buildAction(`${prefix || DEFAULT_PREFIX}::${WEBSOCKET_SEND}`, msg);
 

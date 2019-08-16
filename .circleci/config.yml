@@ -1,0 +1,36 @@
+version: 2
+
+jobs:
+  lint:
+    docker:
+      - image: circleci/node:lts
+    steps:
+      - checkout
+      - run: npm ci
+      - run: cd demo && npm ci && cd -
+      - run: npm run lint
+
+  typescript:
+    docker:
+      - image: circleci/node:lts
+    steps:
+      - checkout
+      - run: npm ci
+      - run: npm run check-types
+
+  test:
+    docker:
+      - image: circleci/node:lts
+    steps:
+      - checkout
+      - run: npm ci
+      - run: npm test -- --coverage
+      - run: bash <(curl -s https://codecov.io/bash) -f ./coverage/coverage-final.json
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - lint
+      - typescript
+      - test

@@ -77,11 +77,24 @@ These actions must be dispatched by you, however we do export action creator fun
 import { connect } from '@giantmachines/redux-websocket';
 
 store.dispatch(connect('wss://my-server.com'));
+
+// You can also provide protocols if needed.
+// See: https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/WebSocket
+//
+// Note that this function only allows passing an array of protocols, even though
+// the spec allows passing a string or an array of strings. This is to support
+// the prefix argument, in the case that you've prefixed your action names.
+store.dispatch(connect('wss://my-server.com', ['v1.stream.example.com']));
+
+// ...other ways to call this function:
+store.dispatch(connect('wss://my-server.com', ['v1.stream.example.com'], 'MY_PREFIX'));
+store.dispatch(connect('wss://my-server.com', 'MY_PREFIX'));
 ```
 
 ###### Arguments:
 
 1. `url` *(`string`)*: WebSocket URL to connect to.
+2. \[`protocols`\] *(`string[]`)*: Optional sub-protocols.
 2. \[`prefix`\] *(`string`)*: Optional action type prefix.
 
 ---

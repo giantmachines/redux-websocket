@@ -32,6 +32,32 @@ describe('actions', () => {
           },
         });
       });
+
+      it('should return the correct action with protocols', () => {
+        const act = actions.connect('fake url', ['protocol']);
+
+        expect(act).toEqual({
+          type: `${actionTypes.DEFAULT_PREFIX}::${actionTypes.WEBSOCKET_CONNECT}`,
+          meta: { timestamp: expect.any(Date) },
+          payload: {
+            url: 'fake url',
+            protocols: ['protocol'],
+          },
+        });
+      });
+
+      it('should return the correct action with protocols and a user prefix', () => {
+        const act = actions.connect('fake url', ['protocol'], PREFIX);
+
+        expect(act).toEqual({
+          type: `${PREFIX}::${actionTypes.WEBSOCKET_CONNECT}`,
+          meta: { timestamp: expect.any(Date) },
+          payload: {
+            url: 'fake url',
+            protocols: ['protocol'],
+          },
+        });
+      });
     });
 
     describe('disconnect', () => {
