@@ -277,11 +277,11 @@ describe('ReduxWebSocket', () => {
       jest.advanceTimersByTime(5000);
 
       // Make sure we actually check all of the calls to `dispatch`.
-      expect.assertions(7);
+      expect.assertions(6);
 
-      expect(dispatch).toHaveBeenCalledTimes(5);
+      expect(dispatch).toHaveBeenCalledTimes(4);
       // @ts-ignore
-      expect(reduxWebSocket.reconnectCount).toEqual(3);
+      expect(reduxWebSocket.reconnectCount).toEqual(2);
       expect(dispatch).toHaveBeenNthCalledWith(1, {
         type: 'REDUX_WEBSOCKET::BROKEN',
         meta: {
@@ -310,15 +310,6 @@ describe('ReduxWebSocket', () => {
         },
         payload: {
           count: 2,
-        },
-      });
-      expect(dispatch).toHaveBeenNthCalledWith(5, {
-        type: 'REDUX_WEBSOCKET::RECONNECT_ATTEMPT',
-        meta: {
-          timestamp: expect.any(Date),
-        },
-        payload: {
-          count: 3,
         },
       });
     });

@@ -119,12 +119,12 @@ export default class ReduxWebSocket {
    * @param {string} prefix
    * @param {Event} event
    */
-  private handleClose = (dispatch: Dispatch, prefix: string, event: Event) => {
+  private handleClose = (dispatch: Dispatch, prefix: string, event: CloseEvent) => {
     dispatch(closed(event, prefix));
 
     // Conditionally attempt reconnection if enabled and applicable
     const { reconnectOnClose } = this.options;
-    if (reconnectOnClose && this.canAttemptReconnect()) {
+    if (reconnectOnClose && this.canAttemptReconnect() && !event.wasClean) {
       this.handleBrokenConnection(dispatch);
     }
   }
@@ -223,16 +223,7 @@ export default class ReduxWebSocket {
     dispatch(broken(prefix));
     dispatch(beginReconnect(prefix));
 
-    this.reconnectCount = 1;
-
-    dispatch(reconnectAttempt(this.reconnectCount, prefix));
-
-    // Attempt to reconnect immediately by calling connect with assertions
-    // that the arguments conform to the types we expect.
-    this.connect(
-      { dispatch } as MiddlewareAPI,
-      { payload: { url: this.lastSocketUrl } } as Action,
-    );
+    this.reconnectCount = 0;
 
     // Attempt reconnecting on an interval.
     this.reconnectionInterval = setInterval(() => {
