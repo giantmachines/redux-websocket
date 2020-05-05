@@ -1,5 +1,7 @@
 import { Dispatch, MiddlewareAPI } from 'redux';
 
+import * as retry from 'retry';
+
 import {
   beginReconnect,
   broken,
@@ -9,6 +11,7 @@ import {
   open,
   reconnectAttempt,
   reconnected,
+  reconnectAbandoned,
 } from './actions';
 import { Action, Serializer } from './types';
 
@@ -36,15 +39,14 @@ export default class ReduxWebSocket {
   // Keep track of how many times we've attempted to reconnect.
   private reconnectCount: number = 0;
 
-  // We'll create an interval to try and reconnect if the socket connection breaks.
-  private reconnectionInterval: NodeJS.Timeout | null = null;
-
   // Keep track of the last URL we connected to, so that when we automatically
   // try to reconnect, we can connect to the correct URL.
-  private lastSocketUrl: string | null = null;
 
   // Keep track of if the WebSocket connection has ever successfully opened.
   private hasOpened = false;
+
+  // Retry manager
+  private retrier: retry.RetryOperation;
 
   /**
    * Constructor
@@ -54,6 +56,12 @@ export default class ReduxWebSocket {
    */
   constructor(options: ReduxWebSocketOptions) {
     this.options = options;
+
+    this.retrier = retry.operation({
+      forever: true,
+      maxTimeout: 1000,
+      minTimeout: 1000,
+    });
   }
 
   /**
@@ -63,24 +71,76 @@ export default class ReduxWebSocket {
    * @param {Action} action
    */
   connect = ({ dispatch }: MiddlewareAPI, { payload }: Action) => {
+    console.log('Top of connect');
     this.close();
+    this.retrier.reset();
 
+    this.retrier.attempt(
+      () =>
+        this.reliablyConnect(
+          { dispatch } as MiddlewareAPI,
+          { payload } as Action
+        ),
+      {
+        timeout: 3000,
+        cb: this.onTimeout,
+      } as retry.AttemptTimeoutOptions
+    );
+  };
+
+  private onTimeout = () => {
+    console.log('Websocket connection timed out');
+    this.websocket && this.websocket.close(1000, 'client-side timeout');
+  };
+
+  private attemptReconnection = (
+    { dispatch }: MiddlewareAPI,
+    reason: string
+  ) => {
+    const { prefix } = this.options;
+    if (this.retrier.retry(new Error('Websocket closed: ' + reason))) {
+      dispatch(broken(prefix));
+      return;
+    } else {
+      dispatch(reconnectAbandoned(prefix));
+    }
+  };
+
+  private reliablyConnect = (
+    { dispatch }: MiddlewareAPI,
+    { payload }: Action
+  ) => {
     const { prefix } = this.options;
 
-    this.lastSocketUrl = payload.url;
+    // Announce what we're about to do
+    const retries = this.retrier.attempts() - 1;
+
+    if (retries) {
+      // the BEGIN_RECONNECT action only fires for the first retry attempt
+      if (retries === 1) {
+        dispatch(beginReconnect(prefix));
+      }
+
+      dispatch(reconnectAttempt(retries, prefix));
+    }
+
     this.websocket = payload.protocols
       ? new WebSocket(payload.url, payload.protocols)
       : new WebSocket(payload.url);
 
-    this.websocket.addEventListener('close', (event) =>
-      this.handleClose(dispatch, prefix, event)
-    );
+    this.websocket.addEventListener('close', (event) => {
+      this.handleClose(dispatch, prefix, event);
+      this.attemptReconnection({ dispatch } as MiddlewareAPI, event.reason);
+    });
+
     this.websocket.addEventListener('error', () =>
       this.handleError(dispatch, prefix)
     );
+
     this.websocket.addEventListener('open', (event) => {
       this.handleOpen(dispatch, prefix, this.options.onOpen, event);
     });
+
     this.websocket.addEventListener('message', (event) =>
       this.handleMessage(dispatch, prefix, event)
     );
@@ -132,12 +192,6 @@ export default class ReduxWebSocket {
    */
   private handleClose = (dispatch: Dispatch, prefix: string, event: Event) => {
     dispatch(closed(event, prefix));
-
-    // Conditionally attempt reconnection if enabled and applicable
-    const { reconnectOnClose } = this.options;
-    if (reconnectOnClose && this.canAttemptReconnect()) {
-      this.handleBrokenConnection(dispatch);
-    }
   };
 
   /**
@@ -149,9 +203,6 @@ export default class ReduxWebSocket {
    */
   private handleError = (dispatch: Dispatch, prefix: string) => {
     dispatch(error(null, new Error('`redux-websocket` error'), prefix));
-    if (this.canAttemptReconnect()) {
-      this.handleBrokenConnection(dispatch);
-    }
   };
 
   /**
@@ -168,13 +219,11 @@ export default class ReduxWebSocket {
     onOpen: ((s: WebSocket) => void) | undefined,
     event: Event
   ) => {
-    // Clean up any outstanding reconnection attempts.
-    if (this.reconnectionInterval) {
-      clearInterval(this.reconnectionInterval);
+    // We don't need to retry any more if it works -- clears any retry timeouts, etc
+    this.retrier.stop();
+    this.retrier.reset();
 
-      this.reconnectionInterval = null;
-      this.reconnectCount = 0;
-
+    if (this.hasOpened) {
       dispatch(reconnected(prefix));
     }
 
@@ -212,10 +261,11 @@ export default class ReduxWebSocket {
    * @private
    *
    * @param {number} [code]
-   * @param {strin} [reason]
+   * @param {string} [reason]
    */
   private close = (code?: number, reason?: string) => {
     if (this.websocket) {
+      this.retrier.stop();
       this.websocket.close(
         code || 1000,
         reason || 'WebSocket connection closed by redux-websocket.'
@@ -225,55 +275,4 @@ export default class ReduxWebSocket {
       this.hasOpened = false;
     }
   };
-
-  /**
-   * Handle a broken socket connection.
-   * @private
-   *
-   * @param {Dispatch} dispatch
-   */
-  private handleBrokenConnection = (dispatch: Dispatch) => {
-    const { prefix, reconnectInterval } = this.options;
-
-    this.websocket = null;
-
-    // First, dispatch actions to notify Redux that our connection broke.
-    dispatch(broken(prefix));
-    dispatch(beginReconnect(prefix));
-
-    this.reconnectCount = 1;
-
-    dispatch(reconnectAttempt(this.reconnectCount, prefix));
-
-    // Attempt to reconnect immediately by calling connect with assertions
-    // that the arguments conform to the types we expect.
-    this.connect(
-      { dispatch } as MiddlewareAPI,
-      { payload: { url: this.lastSocketUrl } } as Action
-    );
-
-    // Attempt reconnecting on an interval.
-    this.reconnectionInterval = setInterval(() => {
-      this.reconnectCount += 1;
-
-      dispatch(reconnectAttempt(this.reconnectCount, prefix));
-
-      // Call connect again, same way.
-      this.connect(
-        { dispatch } as MiddlewareAPI,
-        { payload: { url: this.lastSocketUrl } } as Action
-      );
-    }, reconnectInterval);
-  };
-
-  // Only attempt to reconnect if the connection has ever successfully opened,
-  // and we're not currently trying to reconnect.
-  //
-  // This prevents ongoing reconnect loops to connections that have not
-  // successfully opened before, such as net::ERR_CONNECTION_REFUSED errors.
-  //
-  // This also prevents starting multiple reconnection attempt loops.
-  private canAttemptReconnect(): boolean {
-    return this.hasOpened && this.reconnectionInterval == null;
-  }
 }
