@@ -37,7 +37,9 @@
   "author": "Giant Machines <contact@giantmachines.com> (https://giantmachines.com)",
   "license": "MIT",
   "dependencies": {
-    "redux": "~4"
+    "@types/retry": "^0.12.0",
+    "redux": "~4",
+    "retry": "^0.12.0"
   },
   "devDependencies": {
     "@babel/cli": "7.2.0",
