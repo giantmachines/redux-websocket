@@ -3,6 +3,7 @@ import {
   WEBSOCKET_BROKEN,
   WEBSOCKET_BEGIN_RECONNECT,
   WEBSOCKET_RECONNECT_ATTEMPT,
+  WEBSOCKET_RECONNECT_ABANDONED,
   WEBSOCKET_RECONNECTED,
   WEBSOCKET_CLOSED,
   WEBSOCKET_CONNECT,
@@ -92,6 +93,8 @@ export const beginReconnect = (prefix: string) =>
   buildAction(`${prefix}::${WEBSOCKET_BEGIN_RECONNECT}`);
 export const reconnectAttempt = (count: number, prefix: string) =>
   buildAction(`${prefix}::${WEBSOCKET_RECONNECT_ATTEMPT}`, { count });
+export const reconnectAbandoned = (prefix: string) =>
+  buildAction(`${prefix}::${WEBSOCKET_RECONNECT_ABANDONED}`);
 export const reconnected = (prefix: string) =>
   buildAction(`${prefix}::${WEBSOCKET_RECONNECTED}`);
 export const open = (event: Event, prefix: string) =>
