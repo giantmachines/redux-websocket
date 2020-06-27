@@ -295,6 +295,43 @@ describe('ReduxWebSocket', () => {
       expect(sendMock).toHaveBeenCalledWith('{"test":"value"}');
     });
 
+    it('should use a JSON serialized Date if stringTimestamp is true', () => {
+
+      reduxWebSocket = new ReduxWebSocket({
+        ...options,
+        stringTimestamp: true,
+      });
+
+      const connectAction = { type: CONNECT, payload: { url } };
+      reduxWebSocket.connect(store, connectAction);
+
+      const event = addEventListenerMock.mock.calls.find(
+        (call) => call[0] === 'message'
+      );
+      const data = '{ "test": "message" }';
+      const testEvent = { data, origin: 'test origin' };
+
+      event[1](testEvent);
+
+      expect(store.dispatch).toHaveBeenCalledTimes(1);
+      expect(store.dispatch).toHaveBeenCalledWith({
+        type: 'REDUX_WEBSOCKET::MESSAGE',
+        meta: {
+          timestamp: expect.anything(),
+        },
+        payload: {
+          event: testEvent,
+          message: data,
+          origin: 'test origin',
+        },
+      });
+
+      const call = store.dispatch.mock.calls[0][0];
+      const timestamp: string = call.meta.timestamp;
+      const match = expect.stringMatching(/[0-9]{4}-[0-9]{2}-[0-9]{2}.*/);
+      expect(timestamp).toEqual(match);
+    });
+
     it('should send a custom message', () => {
       const action = { type: 'SEND', payload: { url } };
       const pld = { test: 'value', another: 'prop' };
