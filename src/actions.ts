@@ -16,12 +16,13 @@ import { Action } from './types';
 
 type WithProtocols = [string[]] | [string[], string];
 type WithPrefix = [string];
+type WithStringDateAndPrefix = [boolean, string?];
 type ConnectRestArgs = [] | WithPrefix | WithProtocols;
 
 type BuiltAction<T> = {
   type: string;
   meta: {
-    timestamp: Date;
+    timestamp: Date | string;
   };
   payload?: T;
 };
@@ -43,13 +44,18 @@ const isProtocols = (args: ConnectRestArgs): args is WithProtocols =>
  */
 function buildAction<T>(
   actionType: string,
+  string_timestamp: boolean,
   payload?: T,
   meta?: any
 ): BuiltAction<T> {
+  var timestamp: Date | string = new Date();
+  if (string_timestamp) {
+    timestamp = timestamp.toJSON();
+  }
   const base = {
     type: actionType,
     meta: {
-      timestamp: new Date(),
+      timestamp: timestamp,
       ...meta,
     },
     // Mixin the `error` key if the payload is an Error.
@@ -61,7 +67,11 @@ function buildAction<T>(
 
 // Action creators for user dispatched actions. These actions are all optionally
 // prefixed.
-export const connect = (url: string, ...args: ConnectRestArgs) => {
+export const connect = (
+  url: string,
+  string_timestamp: boolean,
+  ...args: ConnectRestArgs
+) => {
   let prefix: string | undefined;
   let protocols: string[] | undefined;
 
@@ -75,44 +85,88 @@ export const connect = (url: string, ...args: ConnectRestArgs) => {
     [protocols, prefix] = args;
   }
 
-  return buildAction(`${prefix || DEFAULT_PREFIX}::${WEBSOCKET_CONNECT}`, {
-    url,
-    protocols,
-  });
+  return buildAction(
+    `${prefix || DEFAULT_PREFIX}::${WEBSOCKET_CONNECT}`,
+    string_timestamp,
+    {
+      url,
+      protocols,
+    }
+  );
 };
-export const disconnect = (prefix?: string) =>
-  buildAction(`${prefix || DEFAULT_PREFIX}::${WEBSOCKET_DISCONNECT}`);
-export const send = (msg: any, prefix?: string) =>
-  buildAction(`${prefix || DEFAULT_PREFIX}::${WEBSOCKET_SEND}`, msg);
+export const disconnect = (...args: WithStringDateAndPrefix) => {
+  const [string_timestamp, prefix] = args;
+  return buildAction(
+    `${prefix || DEFAULT_PREFIX}::${WEBSOCKET_DISCONNECT}`,
+    string_timestamp
+  );
+};
+export const send = (msg: any, ...args: WithStringDateAndPrefix) => {
+  const [string_timestamp, prefix] = args;
+  return buildAction(
+    `${prefix || DEFAULT_PREFIX}::${WEBSOCKET_SEND}`,
+    string_timestamp,
+    msg
+  );
+};
 
 // Action creators for actions dispatched by redux-websocket. All of these must
 // take a prefix. The default prefix should be used unless a user has created
 // this middleware with the prefix option set.
-export const beginReconnect = (prefix: string) =>
-  buildAction(`${prefix}::${WEBSOCKET_BEGIN_RECONNECT}`);
-export const reconnectAttempt = (count: number, prefix: string) =>
-  buildAction(`${prefix}::${WEBSOCKET_RECONNECT_ATTEMPT}`, { count });
-export const reconnected = (prefix: string) =>
-  buildAction(`${prefix}::${WEBSOCKET_RECONNECTED}`);
-export const open = (event: Event, prefix: string) =>
-  buildAction(`${prefix}::${WEBSOCKET_OPEN}`, event);
-export const broken = (prefix: string) =>
-  buildAction(`${prefix}::${WEBSOCKET_BROKEN}`);
-export const closed = (event: Event, prefix: string) =>
-  buildAction(`${prefix}::${WEBSOCKET_CLOSED}`, event);
-export const message = (event: MessageEvent, prefix: string) =>
-  buildAction(`${prefix}::${WEBSOCKET_MESSAGE}`, {
+export const beginReconnect = (...args: WithStringDateAndPrefix) => {
+  const [string_timestamp, prefix] = args;
+  return buildAction(
+    `${prefix}::${WEBSOCKET_BEGIN_RECONNECT}`,
+    string_timestamp
+  );
+};
+export const reconnectAttempt = (
+  count: number,
+  ...args: WithStringDateAndPrefix
+) => {
+  const [string_timestamp, prefix] = args;
+  return buildAction(
+    `${prefix}::${WEBSOCKET_RECONNECT_ATTEMPT}`,
+    string_timestamp,
+    { count }
+  );
+};
+export const reconnected = (...args: WithStringDateAndPrefix) => {
+  const [string_timestamp, prefix] = args;
+  return buildAction(`${prefix}::${WEBSOCKET_RECONNECTED}`, string_timestamp);
+};
+export const open = (event: Event, ...args: WithStringDateAndPrefix) => {
+  const [string_timestamp, prefix] = args;
+  return buildAction(`${prefix}::${WEBSOCKET_OPEN}`, string_timestamp, event);
+};
+export const broken = (...args: WithStringDateAndPrefix) => {
+  const [string_timestamp, prefix] = args;
+  return buildAction(`${prefix}::${WEBSOCKET_BROKEN}`, string_timestamp);
+};
+export const closed = (event: Event, ...args: WithStringDateAndPrefix) => {
+  const [string_timestamp, prefix] = args;
+  return buildAction(`${prefix}::${WEBSOCKET_CLOSED}`, string_timestamp, event);
+};
+export const message = (
+  event: MessageEvent,
+  ...args: WithStringDateAndPrefix
+) => {
+  const [string_timestamp, prefix] = args;
+  return buildAction(`${prefix}::${WEBSOCKET_MESSAGE}`, string_timestamp, {
     event,
     message: event.data,
     origin: event.origin,
   });
+};
 export const error = (
   originalAction: Action | null,
   err: Error,
-  prefix: string
-) =>
-  buildAction(`${prefix}::${WEBSOCKET_ERROR}`, err, {
+  ...args: WithStringDateAndPrefix
+) => {
+  const [string_timestamp, prefix] = args;
+  return buildAction(`${prefix}::${WEBSOCKET_ERROR}`, string_timestamp, err, {
     message: err.message,
     name: err.name,
     originalAction,
   });
+};

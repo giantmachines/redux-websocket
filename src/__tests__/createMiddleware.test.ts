@@ -62,6 +62,7 @@ describe('middleware', () => {
 
     expect(ReduxWebSocketMock).toHaveBeenCalledWith({
       prefix: 'REDUX_WEBSOCKET',
+      string_timestamp: false,
       reconnectInterval: 2000,
       reconnectOnClose: false,
       serializer: JSON.stringify,
@@ -69,10 +70,11 @@ describe('middleware', () => {
   });
 
   it('passes custom options to the ReduxWebSocket constructor', () => {
-    middleware({ prefix: 'CUSTOM' });
+    middleware({ prefix: 'CUSTOM', string_timestamp: false });
 
     expect(ReduxWebSocketMock).toHaveBeenCalledWith({
       prefix: 'CUSTOM',
+      string_timestamp: false,
       reconnectInterval: 2000,
       reconnectOnClose: false,
       serializer: JSON.stringify,
@@ -80,18 +82,20 @@ describe('middleware', () => {
   });
 
   it('can create multiple instances of ReduxWebSocket', () => {
-    middleware({ prefix: 'ONE' });
-    middleware({ prefix: 'TWO', reconnectOnClose: true });
+    middleware({ prefix: 'ONE', string_timestamp: false });
+    middleware({ prefix: 'TWO', string_timestamp: false, reconnectOnClose: true });
 
     expect(ReduxWebSocketMock).toHaveBeenCalledTimes(2);
     expect(ReduxWebSocketMock).toHaveBeenCalledWith({
       prefix: 'ONE',
+      string_timestamp: false,
       reconnectInterval: 2000,
       reconnectOnClose: false,
       serializer: JSON.stringify,
     });
     expect(ReduxWebSocketMock).toHaveBeenCalledWith({
       prefix: 'TWO',
+      string_timestamp: false,
       reconnectInterval: 2000,
       reconnectOnClose: true,
       serializer: JSON.stringify,
@@ -108,7 +112,7 @@ describe('middleware', () => {
       },
     };
 
-    const val = dispatch(actions.connect('ws://example.com'));
+    const val = dispatch(actions.connect('ws://example.com', false));
 
     expect(val).toEqual(dispatchedAction);
     expect(connectMock).toHaveBeenCalledTimes(1);
@@ -122,7 +126,7 @@ describe('middleware', () => {
       meta: { timestamp: expect.any(Date) },
     };
 
-    const val = dispatch(actions.disconnect());
+    const val = dispatch(actions.disconnect(false));
 
     expect(val).toEqual(dispatchedAction);
     expect(disconnectMock).toHaveBeenCalledTimes(1);
@@ -139,7 +143,7 @@ describe('middleware', () => {
       },
     };
 
-    const val = dispatch(actions.send({ test: 'message' }));
+    const val = dispatch(actions.send({ test: 'message' }, false));
 
     expect(val).toEqual(dispatchedAction);
     expect(sendMock).toHaveBeenCalledTimes(1);
@@ -167,7 +171,7 @@ describe('middleware', () => {
     });
 
     const { dispatch } = mockStore();
-    const result = dispatch(actions.send({ test: 'message' }));
+    const result = dispatch(actions.send({ test: 'message' }, false));
     const expectedResult = {
       type: 'REDUX_WEBSOCKET::SEND',
       meta: {

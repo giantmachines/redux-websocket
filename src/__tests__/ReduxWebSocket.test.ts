@@ -17,6 +17,7 @@ describe('ReduxWebSocket', () => {
   const url = 'ws://fake.com';
   const options = {
     prefix: 'REDUX_WEBSOCKET',
+    string_timestamp: false,
     reconnectInterval: 2000,
     reconnectOnClose: false,
     serializer: JSON.stringify,
@@ -111,10 +112,10 @@ describe('ReduxWebSocket', () => {
 
       /* eslint-disable dot-notation */
       rws['handleBrokenConnection'] = jest.fn();
-      rws['handleClose'](dispatch, 'prefix', event);
+      rws['handleClose'](dispatch, false, 'prefix', event);
       expect(rws['handleBrokenConnection']).not.toHaveBeenCalled();
       rws['hasOpened'] = true;
-      rws['handleClose'](dispatch, 'prefix', event);
+      rws['handleClose'](dispatch, false, 'prefix', event);
       expect(rws['handleBrokenConnection']).toHaveBeenCalledTimes(1);
       expect(rws['handleBrokenConnection']).toHaveBeenCalledWith(dispatch);
       /* eslint-enable dot-notation */
@@ -171,11 +172,11 @@ describe('ReduxWebSocket', () => {
 
         /* eslint-disable dot-notation */
         reduxWebSocket['handleBrokenConnection'] = jest.fn();
-        reduxWebSocket['handleError'](dispatch, 'prefix');
+        reduxWebSocket['handleError'](dispatch, false, 'prefix');
         expect(reduxWebSocket['handleBrokenConnection']).not.toHaveBeenCalled();
 
         reduxWebSocket['hasOpened'] = true;
-        reduxWebSocket['handleError'](dispatch, 'prefix');
+        reduxWebSocket['handleError'](dispatch, false, 'prefix');
         expect(reduxWebSocket['handleBrokenConnection']).toHaveBeenCalledTimes(
           1
         );

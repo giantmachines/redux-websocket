@@ -3,13 +3,14 @@ import { isFSA, isError } from 'flux-standard-action';
 import * as actions from '../actions';
 import * as actionTypes from '../actionTypes';
 
+const STRING_TIMESTAMP = false;
 const PREFIX = 'ACTION_PREFIX';
 
 describe('actions', () => {
   describe('user dispatched', () => {
     describe('connect', () => {
       it('should return the correct action with a default prefix', () => {
-        const act = actions.connect('fake url');
+        const act = actions.connect('fake url', STRING_TIMESTAMP);
 
         expect(isFSA(act)).toBe(true);
         expect(act).toEqual({
@@ -22,7 +23,7 @@ describe('actions', () => {
       });
 
       it('should return the correct action with user prefix', () => {
-        const act = actions.connect('fake url', PREFIX);
+        const act = actions.connect('fake url', STRING_TIMESTAMP, PREFIX);
 
         expect(isFSA(act)).toBe(true);
         expect(act).toEqual({
@@ -35,7 +36,7 @@ describe('actions', () => {
       });
 
       it('should return the correct action with protocols', () => {
-        const act = actions.connect('fake url', ['protocol']);
+        const act = actions.connect('fake url', STRING_TIMESTAMP, ['protocol']);
 
         expect(isFSA(act)).toBe(true);
         expect(act).toEqual({
@@ -49,7 +50,7 @@ describe('actions', () => {
       });
 
       it('should return the correct action with protocols and a user prefix', () => {
-        const act = actions.connect('fake url', ['protocol'], PREFIX);
+        const act = actions.connect('fake url', STRING_TIMESTAMP, ['protocol'], PREFIX);
 
         expect(isFSA(act)).toBe(true);
         expect(act).toEqual({
@@ -65,7 +66,7 @@ describe('actions', () => {
 
     describe('disconnect', () => {
       it('should return the correct action with a default prefix', () => {
-        const act = actions.disconnect();
+        const act = actions.disconnect(STRING_TIMESTAMP);
 
         expect(isFSA(act)).toBe(true);
         expect(act).toEqual({
@@ -75,7 +76,7 @@ describe('actions', () => {
       });
 
       it('should return the correct action with user prefix', () => {
-        const act = actions.disconnect(PREFIX);
+        const act = actions.disconnect(STRING_TIMESTAMP, PREFIX);
 
         expect(isFSA(act)).toBe(true);
         expect(act).toEqual({
@@ -87,7 +88,7 @@ describe('actions', () => {
 
     describe('send', () => {
       it('should return the correct action with a default prefix', () => {
-        const act = actions.send({ test: 'value' });
+        const act = actions.send({ test: 'value' }, STRING_TIMESTAMP);
 
         expect(isFSA(act)).toBe(true);
         expect(act).toEqual({
@@ -100,7 +101,7 @@ describe('actions', () => {
       });
 
       it('should return the correct action with user prefix', () => {
-        const act = actions.send({ test: 'value' }, PREFIX);
+        const act = actions.send({ test: 'value' }, STRING_TIMESTAMP, PREFIX);
 
         expect(isFSA(act)).toBe(true);
         expect(act).toEqual({
@@ -117,7 +118,7 @@ describe('actions', () => {
   describe('library dispatched', () => {
     describe('beginReconnect', () => {
       it('should return the correct action', () => {
-        const act = actions.beginReconnect(PREFIX);
+        const act = actions.beginReconnect(STRING_TIMESTAMP, PREFIX);
 
         expect(isFSA(act)).toBe(true);
         expect(act).toEqual({
@@ -129,7 +130,7 @@ describe('actions', () => {
 
     describe('reconnectAttempt', () => {
       it('should return the correct action', () => {
-        const act = actions.reconnectAttempt(1, PREFIX);
+        const act = actions.reconnectAttempt(1, STRING_TIMESTAMP, PREFIX);
 
         expect(isFSA(act)).toBe(true);
         expect(act).toEqual({
@@ -144,7 +145,7 @@ describe('actions', () => {
 
     describe('reconnected', () => {
       it('should return the correct action', () => {
-        const act = actions.reconnected(PREFIX);
+        const act = actions.reconnected(STRING_TIMESTAMP, PREFIX);
 
         expect(isFSA(act)).toBe(true);
         expect(act).toEqual({
@@ -157,7 +158,7 @@ describe('actions', () => {
     describe('closed', () => {
       it('should return the correct action', () => {
         const event = new Event('');
-        const act = actions.closed(event, PREFIX);
+        const act = actions.closed(event, STRING_TIMESTAMP, PREFIX);
 
         expect(isFSA(act)).toBe(true);
         expect(act).toEqual({
@@ -171,7 +172,7 @@ describe('actions', () => {
     describe('message', () => {
       it('should return the correct action', () => {
         const event = new MessageEvent('');
-        const act = actions.message(event, PREFIX);
+        const act = actions.message(event, STRING_TIMESTAMP, PREFIX);
 
         expect(isFSA(act)).toBe(true);
         expect(act).toEqual({
@@ -189,7 +190,7 @@ describe('actions', () => {
     describe('open', () => {
       it('should return the correct action', () => {
         const event = new Event('');
-        const act = actions.open(event, PREFIX);
+        const act = actions.open(event, STRING_TIMESTAMP, PREFIX);
 
         expect(isFSA(act)).toBe(true);
         expect(act).toEqual({
@@ -202,7 +203,7 @@ describe('actions', () => {
 
     describe('broken', () => {
       it('should return the correct action', () => {
-        const act = actions.broken(PREFIX);
+        const act = actions.broken(STRING_TIMESTAMP, PREFIX);
 
         expect(isFSA(act)).toBe(true);
         expect(act).toEqual({
@@ -216,7 +217,7 @@ describe('actions', () => {
       it('should return the correct action with a test action', () => {
         const err = new Error('test');
         const originalAction = { type: 'SEND' as 'SEND', payload: null };
-        const act = actions.error(originalAction, err, PREFIX);
+        const act = actions.error(originalAction, err, STRING_TIMESTAMP, PREFIX);
 
         expect(isFSA(act)).toBe(true);
         expect(isError(act)).toBe(true);
@@ -235,7 +236,7 @@ describe('actions', () => {
 
       it('should return the correct action with a null action', () => {
         const err = new Error('test');
-        const act = actions.error(null, err, PREFIX);
+        const act = actions.error(null, err, STRING_TIMESTAMP, PREFIX);
 
         expect(isFSA(act)).toBe(true);
         expect(isError(act)).toBe(true);

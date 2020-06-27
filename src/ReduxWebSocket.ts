@@ -14,6 +14,7 @@ import { Action, Serializer } from './types';
 
 interface ReduxWebSocketOptions {
   prefix: string;
+  string_timestamp: boolean;
   reconnectInterval: number;
   reconnectOnClose: boolean;
   onOpen?: (s: WebSocket) => void;
@@ -65,7 +66,7 @@ export default class ReduxWebSocket {
   connect = ({ dispatch }: MiddlewareAPI, { payload }: Action) => {
     this.close();
 
-    const { prefix } = this.options;
+    const { string_timestamp, prefix } = this.options;
 
     this.lastSocketUrl = payload.url;
     this.websocket = payload.protocols
@@ -73,16 +74,22 @@ export default class ReduxWebSocket {
       : new WebSocket(payload.url);
 
     this.websocket.addEventListener('close', (event) =>
-      this.handleClose(dispatch, prefix, event)
+      this.handleClose(dispatch, string_timestamp, prefix, event)
     );
     this.websocket.addEventListener('error', () =>
-      this.handleError(dispatch, prefix)
+      this.handleError(dispatch, string_timestamp, prefix)
     );
     this.websocket.addEventListener('open', (event) => {
-      this.handleOpen(dispatch, prefix, this.options.onOpen, event);
+      this.handleOpen(
+        dispatch,
+        string_timestamp,
+        prefix,
+        this.options.onOpen,
+        event
+      );
     });
     this.websocket.addEventListener('message', (event) =>
-      this.handleMessage(dispatch, prefix, event)
+      this.handleMessage(dispatch, string_timestamp, prefix, event)
     );
   };
 
@@ -130,8 +137,13 @@ export default class ReduxWebSocket {
    * @param {string} prefix
    * @param {Event} event
    */
-  private handleClose = (dispatch: Dispatch, prefix: string, event: Event) => {
-    dispatch(closed(event, prefix));
+  private handleClose = (
+    dispatch: Dispatch,
+    string_timestamp: boolean,
+    prefix: string,
+    event: Event
+  ) => {
+    dispatch(closed(event, string_timestamp, prefix));
 
     // Conditionally attempt reconnection if enabled and applicable
     const { reconnectOnClose } = this.options;
@@ -147,8 +159,19 @@ export default class ReduxWebSocket {
    * @param {string} prefix
    * @param {Event} event
    */
-  private handleError = (dispatch: Dispatch, prefix: string) => {
-    dispatch(error(null, new Error('`redux-websocket` error'), prefix));
+  private handleError = (
+    dispatch: Dispatch,
+    string_timestamp: boolean,
+    prefix: string
+  ) => {
+    dispatch(
+      error(
+        null,
+        new Error('`redux-websocket` error'),
+        string_timestamp,
+        prefix
+      )
+    );
     if (this.canAttemptReconnect()) {
       this.handleBrokenConnection(dispatch);
     }
@@ -164,6 +187,7 @@ export default class ReduxWebSocket {
    */
   private handleOpen = (
     dispatch: Dispatch,
+    string_timestamp: boolean,
     prefix: string,
     onOpen: ((s: WebSocket) => void) | undefined,
     event: Event
@@ -175,7 +199,7 @@ export default class ReduxWebSocket {
       this.reconnectionInterval = null;
       this.reconnectCount = 0;
 
-      dispatch(reconnected(prefix));
+      dispatch(reconnected(string_timestamp, prefix));
     }
 
     // Hook to allow consumers to get access to the raw socket.
@@ -184,7 +208,7 @@ export default class ReduxWebSocket {
     }
 
     // Now we're fully open and ready to send messages.
-    dispatch(open(event, prefix));
+    dispatch(open(event, string_timestamp, prefix));
 
     // Track that we've been able to open the connection. We can use this flag
     // for error handling later, ensuring we don't try to reconnect when a
@@ -201,10 +225,11 @@ export default class ReduxWebSocket {
    */
   private handleMessage = (
     dispatch: Dispatch,
+    string_timestamp: boolean,
     prefix: string,
     event: MessageEvent
   ) => {
-    dispatch(message(event, prefix));
+    dispatch(message(event, string_timestamp, prefix));
   };
 
   /**
@@ -233,17 +258,17 @@ export default class ReduxWebSocket {
    * @param {Dispatch} dispatch
    */
   private handleBrokenConnection = (dispatch: Dispatch) => {
-    const { prefix, reconnectInterval } = this.options;
+    const { string_timestamp, prefix, reconnectInterval } = this.options;
 
     this.websocket = null;
 
     // First, dispatch actions to notify Redux that our connection broke.
-    dispatch(broken(prefix));
-    dispatch(beginReconnect(prefix));
+    dispatch(broken(string_timestamp, prefix));
+    dispatch(beginReconnect(string_timestamp, prefix));
 
     this.reconnectCount = 1;
 
-    dispatch(reconnectAttempt(this.reconnectCount, prefix));
+    dispatch(reconnectAttempt(this.reconnectCount, string_timestamp, prefix));
 
     // Attempt to reconnect immediately by calling connect with assertions
     // that the arguments conform to the types we expect.
@@ -256,7 +281,7 @@ export default class ReduxWebSocket {
     this.reconnectionInterval = setInterval(() => {
       this.reconnectCount += 1;
 
-      dispatch(reconnectAttempt(this.reconnectCount, prefix));
+      dispatch(reconnectAttempt(this.reconnectCount, string_timestamp, prefix));
 
       // Call connect again, same way.
       this.connect(
