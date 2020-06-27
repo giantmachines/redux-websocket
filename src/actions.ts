@@ -48,14 +48,14 @@ function buildAction<T>(
   payload?: T,
   meta?: any
 ): BuiltAction<T> {
-  var timestamp: Date | string = new Date();
+  let timestamp: Date | string = new Date();
   if (stringTimestamp) {
     timestamp = timestamp.toJSON();
   }
   const base = {
     type: actionType,
     meta: {
-      timestamp: timestamp,
+      timestamp,
       ...meta,
     },
     // Mixin the `error` key if the payload is an Error.

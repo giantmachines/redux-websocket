@@ -326,7 +326,8 @@ describe('ReduxWebSocket', () => {
       });
 
       const call = store.dispatch.mock.calls[0][0];
-      const timestamp: string = call.meta.timestamp;
+      const { meta } = call;
+      const { timestamp } = meta;
       const match = expect.stringMatching(/[0-9]{4}-[0-9]{2}-[0-9]{2}.*/);
       expect(timestamp).toEqual(match);
     });
