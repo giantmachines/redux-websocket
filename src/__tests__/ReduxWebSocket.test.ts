@@ -17,7 +17,7 @@ describe('ReduxWebSocket', () => {
   const url = 'ws://fake.com';
   const options = {
     prefix: 'REDUX_WEBSOCKET',
-    string_timestamp: false,
+    stringTimestamp: false,
     reconnectInterval: 2000,
     reconnectOnClose: false,
     serializer: JSON.stringify,

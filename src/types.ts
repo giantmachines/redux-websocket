@@ -28,12 +28,12 @@ type Action =
   | { type: typeof WEBSOCKET_SEND; payload: any };
 
 type Options = {
+  stringTimestamp: boolean;
   prefix?: string;
   reconnectInterval?: number;
   reconnectOnClose?: boolean;
   onOpen?: (s: WebSocket) => void;
   serializer?: Serializer;
-  string_timestamp: boolean;
 };
 
 // Huh? https://github.com/babel/babel/issues/6065#issuecomment-453901877

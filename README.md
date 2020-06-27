@@ -44,6 +44,9 @@ You may also pass options to the `reduxWebsocket` function.
 
 ```js
 interface Options {
+  // Defaults to false. If false, meta.timestamp will be a Date. If true, the timestamp won't be a
+  // Date but instead a JSON serialized date represented as a string.
+  stringTimestamp: boolean,
   // Defaults to 'REDUX_WEBSOCKET'. Use this option to set a custom action type
   // prefix. This is useful when you're creating multiple instances of the
   // middleware, and need to handle actions dispatched by each middleware instance separately.

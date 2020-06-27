@@ -62,7 +62,7 @@ describe('middleware', () => {
 
     expect(ReduxWebSocketMock).toHaveBeenCalledWith({
       prefix: 'REDUX_WEBSOCKET',
-      string_timestamp: false,
+      stringTimestamp: false,
       reconnectInterval: 2000,
       reconnectOnClose: false,
       serializer: JSON.stringify,
@@ -70,11 +70,11 @@ describe('middleware', () => {
   });
 
   it('passes custom options to the ReduxWebSocket constructor', () => {
-    middleware({ prefix: 'CUSTOM', string_timestamp: false });
+    middleware({ prefix: 'CUSTOM', stringTimestamp: false });
 
     expect(ReduxWebSocketMock).toHaveBeenCalledWith({
       prefix: 'CUSTOM',
-      string_timestamp: false,
+      stringTimestamp: false,
       reconnectInterval: 2000,
       reconnectOnClose: false,
       serializer: JSON.stringify,
@@ -82,20 +82,20 @@ describe('middleware', () => {
   });
 
   it('can create multiple instances of ReduxWebSocket', () => {
-    middleware({ prefix: 'ONE', string_timestamp: false });
-    middleware({ prefix: 'TWO', string_timestamp: false, reconnectOnClose: true });
+    middleware({ prefix: 'ONE', stringTimestamp: false });
+    middleware({ prefix: 'TWO', stringTimestamp: false, reconnectOnClose: true });
 
     expect(ReduxWebSocketMock).toHaveBeenCalledTimes(2);
     expect(ReduxWebSocketMock).toHaveBeenCalledWith({
       prefix: 'ONE',
-      string_timestamp: false,
+      stringTimestamp: false,
       reconnectInterval: 2000,
       reconnectOnClose: false,
       serializer: JSON.stringify,
     });
     expect(ReduxWebSocketMock).toHaveBeenCalledWith({
       prefix: 'TWO',
-      string_timestamp: false,
+      stringTimestamp: false,
       reconnectInterval: 2000,
       reconnectOnClose: true,
       serializer: JSON.stringify,

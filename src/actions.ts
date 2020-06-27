@@ -44,12 +44,12 @@ const isProtocols = (args: ConnectRestArgs): args is WithProtocols =>
  */
 function buildAction<T>(
   actionType: string,
-  string_timestamp: boolean,
+  stringTimestamp: boolean,
   payload?: T,
   meta?: any
 ): BuiltAction<T> {
   var timestamp: Date | string = new Date();
-  if (string_timestamp) {
+  if (stringTimestamp) {
     timestamp = timestamp.toJSON();
   }
   const base = {
@@ -69,7 +69,7 @@ function buildAction<T>(
 // prefixed.
 export const connect = (
   url: string,
-  string_timestamp: boolean,
+  stringTimestamp: boolean,
   ...args: ConnectRestArgs
 ) => {
   let prefix: string | undefined;
@@ -87,7 +87,7 @@ export const connect = (
 
   return buildAction(
     `${prefix || DEFAULT_PREFIX}::${WEBSOCKET_CONNECT}`,
-    string_timestamp,
+    stringTimestamp,
     {
       url,
       protocols,
@@ -95,17 +95,17 @@ export const connect = (
   );
 };
 export const disconnect = (...args: WithStringDateAndPrefix) => {
-  const [string_timestamp, prefix] = args;
+  const [stringTimestamp, prefix] = args;
   return buildAction(
     `${prefix || DEFAULT_PREFIX}::${WEBSOCKET_DISCONNECT}`,
-    string_timestamp
+    stringTimestamp
   );
 };
 export const send = (msg: any, ...args: WithStringDateAndPrefix) => {
-  const [string_timestamp, prefix] = args;
+  const [stringTimestamp, prefix] = args;
   return buildAction(
     `${prefix || DEFAULT_PREFIX}::${WEBSOCKET_SEND}`,
-    string_timestamp,
+    stringTimestamp,
     msg
   );
 };
@@ -114,45 +114,45 @@ export const send = (msg: any, ...args: WithStringDateAndPrefix) => {
 // take a prefix. The default prefix should be used unless a user has created
 // this middleware with the prefix option set.
 export const beginReconnect = (...args: WithStringDateAndPrefix) => {
-  const [string_timestamp, prefix] = args;
+  const [stringTimestamp, prefix] = args;
   return buildAction(
     `${prefix}::${WEBSOCKET_BEGIN_RECONNECT}`,
-    string_timestamp
+    stringTimestamp
   );
 };
 export const reconnectAttempt = (
   count: number,
   ...args: WithStringDateAndPrefix
 ) => {
-  const [string_timestamp, prefix] = args;
+  const [stringTimestamp, prefix] = args;
   return buildAction(
     `${prefix}::${WEBSOCKET_RECONNECT_ATTEMPT}`,
-    string_timestamp,
+    stringTimestamp,
     { count }
   );
 };
 export const reconnected = (...args: WithStringDateAndPrefix) => {
-  const [string_timestamp, prefix] = args;
-  return buildAction(`${prefix}::${WEBSOCKET_RECONNECTED}`, string_timestamp);
+  const [stringTimestamp, prefix] = args;
+  return buildAction(`${prefix}::${WEBSOCKET_RECONNECTED}`, stringTimestamp);
 };
 export const open = (event: Event, ...args: WithStringDateAndPrefix) => {
-  const [string_timestamp, prefix] = args;
-  return buildAction(`${prefix}::${WEBSOCKET_OPEN}`, string_timestamp, event);
+  const [stringTimestamp, prefix] = args;
+  return buildAction(`${prefix}::${WEBSOCKET_OPEN}`, stringTimestamp, event);
 };
 export const broken = (...args: WithStringDateAndPrefix) => {
-  const [string_timestamp, prefix] = args;
-  return buildAction(`${prefix}::${WEBSOCKET_BROKEN}`, string_timestamp);
+  const [stringTimestamp, prefix] = args;
+  return buildAction(`${prefix}::${WEBSOCKET_BROKEN}`, stringTimestamp);
 };
 export const closed = (event: Event, ...args: WithStringDateAndPrefix) => {
-  const [string_timestamp, prefix] = args;
-  return buildAction(`${prefix}::${WEBSOCKET_CLOSED}`, string_timestamp, event);
+  const [stringTimestamp, prefix] = args;
+  return buildAction(`${prefix}::${WEBSOCKET_CLOSED}`, stringTimestamp, event);
 };
 export const message = (
   event: MessageEvent,
   ...args: WithStringDateAndPrefix
 ) => {
-  const [string_timestamp, prefix] = args;
-  return buildAction(`${prefix}::${WEBSOCKET_MESSAGE}`, string_timestamp, {
+  const [stringTimestamp, prefix] = args;
+  return buildAction(`${prefix}::${WEBSOCKET_MESSAGE}`, stringTimestamp, {
     event,
     message: event.data,
     origin: event.origin,
@@ -163,8 +163,8 @@ export const error = (
   err: Error,
   ...args: WithStringDateAndPrefix
 ) => {
-  const [string_timestamp, prefix] = args;
-  return buildAction(`${prefix}::${WEBSOCKET_ERROR}`, string_timestamp, err, {
+  const [stringTimestamp, prefix] = args;
+  return buildAction(`${prefix}::${WEBSOCKET_ERROR}`, stringTimestamp, err, {
     message: err.message,
     name: err.name,
     originalAction,
