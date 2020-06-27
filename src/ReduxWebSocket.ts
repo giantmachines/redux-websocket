@@ -165,12 +165,7 @@ export default class ReduxWebSocket {
     prefix: string
   ) => {
     dispatch(
-      error(
-        null,
-        new Error('`redux-websocket` error'),
-        stringTimestamp,
-        prefix
-      )
+      error(null, new Error('`redux-websocket` error'), stringTimestamp, prefix)
     );
     if (this.canAttemptReconnect()) {
       this.handleBrokenConnection(dispatch);

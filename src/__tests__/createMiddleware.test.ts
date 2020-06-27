@@ -83,7 +83,11 @@ describe('middleware', () => {
 
   it('can create multiple instances of ReduxWebSocket', () => {
     middleware({ prefix: 'ONE', stringTimestamp: false });
-    middleware({ prefix: 'TWO', stringTimestamp: false, reconnectOnClose: true });
+    middleware({
+      prefix: 'TWO',
+      stringTimestamp: false,
+      reconnectOnClose: true,
+    });
 
     expect(ReduxWebSocketMock).toHaveBeenCalledTimes(2);
     expect(ReduxWebSocketMock).toHaveBeenCalledWith({

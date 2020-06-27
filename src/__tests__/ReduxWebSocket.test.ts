@@ -296,7 +296,6 @@ describe('ReduxWebSocket', () => {
     });
 
     it('should use a JSON serialized Date if stringTimestamp is true', () => {
-
       reduxWebSocket = new ReduxWebSocket({
         ...options,
         stringTimestamp: true,

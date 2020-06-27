@@ -50,7 +50,12 @@ describe('actions', () => {
       });
 
       it('should return the correct action with protocols and a user prefix', () => {
-        const act = actions.connect('fake url', STRING_TIMESTAMP, ['protocol'], PREFIX);
+        const act = actions.connect(
+          'fake url',
+          STRING_TIMESTAMP,
+          ['protocol'],
+          PREFIX
+        );
 
         expect(isFSA(act)).toBe(true);
         expect(act).toEqual({
@@ -217,7 +222,12 @@ describe('actions', () => {
       it('should return the correct action with a test action', () => {
         const err = new Error('test');
         const originalAction = { type: 'SEND' as 'SEND', payload: null };
-        const act = actions.error(originalAction, err, STRING_TIMESTAMP, PREFIX);
+        const act = actions.error(
+          originalAction,
+          err,
+          STRING_TIMESTAMP,
+          PREFIX
+        );
 
         expect(isFSA(act)).toBe(true);
         expect(isError(act)).toBe(true);
