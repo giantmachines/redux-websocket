@@ -46,6 +46,6 @@
     "webpack": "4.42.1",
     "webpack-cli": "3.2.3",
     "webpack-dev-server": "3.2.1",
-    "ws": "7.2.3"
+    "ws": "7.4.5"
   }
 }
